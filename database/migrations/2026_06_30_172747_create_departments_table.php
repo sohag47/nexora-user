@@ -15,9 +15,13 @@ return new class extends Migration
         Schema::create('departments', function (Blueprint $table) {
             $table->id();
             $table->string('name')->unique();
-            $table->tinyText('code')->unique();
-            $table->tinyText('status')->default(EntityStatus::DRAFT);
-            $table->foreignId('branch_id')->nullable()->constrained('branches')->nullOnDelete();
+            $table->string('code')->unique();
+            $table->string('status')->default(EntityStatus::DRAFT);
+            $table->unsignedBigInteger('branch_id')->nullable();
+            $table->foreign('branch_id')
+                  ->references('id')
+                  ->on('branches')
+                  ->nullOnDelete();
             $table->timestamps();
             $table->softDeletes();
         });

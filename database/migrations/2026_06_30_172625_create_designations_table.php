@@ -15,8 +15,8 @@ return new class extends Migration
         Schema::create('designations', function (Blueprint $table) {
             $table->id();
             $table->string('name')->unique();
-            $table->tinyText('code')->unique();
-            $table->tinyText('status')->default(EntityStatus::DRAFT);
+            $table->string('code')->unique();
+            $table->string('status')->default(EntityStatus::DRAFT);
             $table->timestamps();
             $table->softDeletes();
         });

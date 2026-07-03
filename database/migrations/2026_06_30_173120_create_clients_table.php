@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->string('phone')->unique();
             $table->string('photo')->nullable();
-            $table->tinyText('status')->default(EntityStatus::DRAFT);
+            $table->string('status')->default(EntityStatus::DRAFT);
             $table->string('address')->nullable();
             $table->timestamps();
             $table->softDeletes();

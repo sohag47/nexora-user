@@ -22,10 +22,10 @@ return new class extends Migration
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->enum('gender', ['male', 'female', 'other'])->nullable();
-            $table->tinyText('status')->default(UserStatus::PENDING);
-            $table->foreignId('branch_id')->nullable()->constrained('branches')->nullOnDelete();
-            $table->foreignId('designation_id')->nullable()->constrained('designations')->nullOnDelete();
-            $table->foreignId('department_id')->nullable()->constrained('departments')->nullOnDelete();
+            $table->string('status')->default(UserStatus::PENDING);
+            $table->unsignedBigInteger('branch_id')->nullable();
+            $table->unsignedBigInteger('designation_id')->nullable();
+            $table->unsignedBigInteger('department_id')->nullable();
             $table->rememberToken();
             $table->timestamps();
             $table->softDeletes();
