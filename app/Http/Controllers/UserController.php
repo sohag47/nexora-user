@@ -2,63 +2,34 @@
 
 namespace App\Http\Controllers;
 
-use App\Enums\UserStatus;
-use App\Models\User;
+use App\Http\Requests\UserRequest;
+use App\Http\Resources\UserResource;
+use App\Services\UserService;
 use App\Traits\ApiResponse;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\Rule;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class UserController extends Controller
 {
     use ApiResponse;
 
+    private $userService;
+
+    public function __construct(UserService $userService)
+    {
+        $this->userService = $userService;
+    }
+
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request)
+    public function index(UserRequest $request): JsonResponse
     {
-        $validator = Validator::make($request->all(), [
-            'page' => ['nullable', 'integer'],
-            'size' => ['nullable', 'integer'],
-            'search' => ['nullable', 'string', 'max:255'],
-            'status' => ['nullable', 'string', 'max:255', Rule::enum(UserStatus::class)],
-            'sort_by' => ['nullable', 'string', Rule::in(['id', 'name', 'email', 'status', 'created_at'])],
-            'direction' => ['nullable', 'string', Rule::in(['asc', 'desc'])],
-        ]);
+        $users = $this->userService->getPaginatedUsers($request->validated());
 
-        if ($validator->fails()) {
-            return $this->validationError($validator->errors());
-        }
-
-        $validated = $validator->validated();
-
-        $query = User::with(['branch', 'designation', 'department']);
-
-        $query->when(! empty($validated['status']), function ($q) use ($validated) {
-            $q->where('status', $validated['status']);
-        });
-
-        // Apply global search across name, email, or relationships
-        $query->when(! empty($validated['search']), function ($q) use ($validated) {
-            $searchTerm = '%'.$validated['search'].'%';
-            $q->where(function ($subQuery) use ($searchTerm) {
-                $subQuery->where('name', 'like', $searchTerm)
-                    ->orWhere('email', 'like', $searchTerm)
-                    ->orWhereHas('branch', function ($b) use ($searchTerm) {
-                        $b->where('name', 'like', $searchTerm);
-                    });
-            });
-        });
-
-        // Apply dynamic sorting with fallbacks
-        $sortBy = $validated['sort_by'] ?? 'created_at';
-        $direction = $validated['direction'] ?? 'desc';
-        $query->orderBy($sortBy, $direction);
-
-        // Dynamic pagination sizing
-        $perPage = $validated['size'] ?? 10;
-        $users = $query->paginate($perPage);
+        /** @var LengthAwarePaginator $users */
+        $users->setCollection(UserResource::collection($users->getCollection())->collection);
 
         return $this->success($users, 'Users List');
     }
