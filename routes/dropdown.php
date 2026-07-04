@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\BranchController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 use Symfony\Component\HttpFoundation\Response;
@@ -14,8 +15,6 @@ use Symfony\Component\HttpFoundation\Response;
 | be assigned to the "api" middleware group. Make something great!
 |
 */
-
-Route::get('users', [UserController::class, 'dropdown']);
 Route::get('/', function () {
     return response()->json([
         'status' => true,
@@ -26,3 +25,6 @@ Route::get('/', function () {
         ],
     ], Response::HTTP_OK);
 });
+
+Route::get('users', [UserController::class, 'dropdown']);
+Route::get('branches', [BranchController::class, 'dropdown']);
