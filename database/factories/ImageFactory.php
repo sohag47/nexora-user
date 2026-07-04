@@ -3,10 +3,11 @@
 namespace Database\Factories;
 
 use App\Models\Course;
+use App\Models\Image;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Image>
+ * @extends Factory<Image>
  */
 class ImageFactory extends Factory
 {
@@ -18,9 +19,10 @@ class ImageFactory extends Factory
     public function definition(): array
     {
         return [
-            'url' => 'images/' . fake()->uuid() . '.jpg',
+            'url' => 'images/'.fake()->uuid().'.jpg',
             'imageable_id' => Course::factory(),
             'imageable_type' => Course::class,
+            'created_by' => 1,
         ];
     }
 }

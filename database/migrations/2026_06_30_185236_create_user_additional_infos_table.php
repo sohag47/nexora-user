@@ -95,6 +95,10 @@ return new class extends Migration
             $table->text('right_irish')->nullable();
             $table->text('nid_input')->nullable();
             $table->longText('finger_binary')->nullable();
+
+            $table->unsignedBigInteger('created_by')->nullable();
+            $table->unsignedBigInteger('updated_by')->nullable();
+            $table->unsignedBigInteger('deleted_by')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });

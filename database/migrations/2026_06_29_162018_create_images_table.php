@@ -15,7 +15,11 @@ return new class extends Migration
             $table->id();
             $table->string('url');
             $table->morphs('imageable'); // Creates imageable_id + imageable_type
+            $table->unsignedBigInteger('created_by')->nullable();
+            $table->unsignedBigInteger('updated_by')->nullable();
+            $table->unsignedBigInteger('deleted_by')->nullable();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

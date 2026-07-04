@@ -3,10 +3,11 @@
 namespace Database\Factories;
 
 use App\Enums\EntityStatus;
+use App\Models\Branch;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Branch>
+ * @extends Factory<Branch>
  */
 class BranchFactory extends Factory
 {
@@ -18,10 +19,11 @@ class BranchFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => fake()->unique()->city() . ' Branch',
+            'name' => fake()->unique()->city().' Branch',
             'code' => fake()->unique()->bothify('BR-####'),
             'address' => fake()->address(),
             'status' => fake()->randomElement([EntityStatus::DRAFT, EntityStatus::ACTIVE]),
+            'created_by' => 1,
         ];
     }
 }

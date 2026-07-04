@@ -6,12 +6,13 @@ use App\Enums\UserStatus;
 use App\Models\Branch;
 use App\Models\Department;
 use App\Models\Designation;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\User>
+ * @extends Factory<User>
  */
 class UserFactory extends Factory
 {
@@ -41,6 +42,7 @@ class UserFactory extends Factory
             'designation_id' => Designation::factory(),
             'department_id' => Department::factory(),
             'remember_token' => Str::random(10),
+            'created_by' => 1,
         ];
     }
 
@@ -49,7 +51,7 @@ class UserFactory extends Factory
      */
     public function unverified(): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'email_verified_at' => null,
         ]);
     }

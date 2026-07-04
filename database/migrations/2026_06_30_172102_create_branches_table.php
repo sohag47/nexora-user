@@ -18,6 +18,9 @@ return new class extends Migration
             $table->string('code')->unique();
             $table->string('address')->nullable();
             $table->string('status')->default(EntityStatus::DRAFT);
+            $table->unsignedBigInteger('created_by')->nullable();
+            $table->unsignedBigInteger('updated_by')->nullable();
+            $table->unsignedBigInteger('deleted_by')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });

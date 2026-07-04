@@ -3,10 +3,11 @@
 namespace Database\Factories;
 
 use App\Models\User;
+use App\Models\UserAdditionalInfo;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\UserAdditionalInfo>
+ * @extends Factory<UserAdditionalInfo>
  */
 class UserAdditionalInfoFactory extends Factory
 {
@@ -26,7 +27,7 @@ class UserAdditionalInfoFactory extends Factory
             'present_address' => fake()->address(),
             'permanent_address' => fake()->address(),
             'mailing_address' => fake()->address(),
-            'office_address' => fake()->company() . ', ' . fake()->address(),
+            'office_address' => fake()->company().', '.fake()->address(),
 
             // Emergency Contact
             'emergency_contact_name' => fake()->name(),
@@ -82,6 +83,7 @@ class UserAdditionalInfoFactory extends Factory
             // The following fields are left NULL by default for performance:
             // email_app_password, spouse_nid_no, signature, all *_image fields,
             // all *_photo fields, seal, left_irish, right_irish, finger_binary, etc.
+            'created_by' => 1,
         ];
     }
 }

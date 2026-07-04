@@ -19,9 +19,12 @@ return new class extends Migration
             $table->string('status')->default(EntityStatus::DRAFT);
             $table->unsignedBigInteger('branch_id')->nullable();
             $table->foreign('branch_id')
-                  ->references('id')
-                  ->on('branches')
-                  ->nullOnDelete();
+                ->references('id')
+                ->on('branches')
+                ->nullOnDelete();
+            $table->unsignedBigInteger('created_by')->nullable();
+            $table->unsignedBigInteger('updated_by')->nullable();
+            $table->unsignedBigInteger('deleted_by')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });

@@ -3,10 +3,11 @@
 namespace Database\Factories;
 
 use App\Enums\EntityStatus;
+use App\Models\Model;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Model>
+ * @extends Factory<Model>
  */
 class DesignationFactory extends Factory
 {
@@ -21,6 +22,7 @@ class DesignationFactory extends Factory
             'name' => fake()->unique()->jobTitle(),
             'code' => fake()->unique()->bothify('DES-####'),
             'status' => fake()->randomElement([EntityStatus::DRAFT, EntityStatus::ACTIVE]),
+            'created_by' => 1,
         ];
     }
 }

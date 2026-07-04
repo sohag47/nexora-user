@@ -3,10 +3,11 @@
 namespace Database\Factories;
 
 use App\Enums\EntityStatus;
+use App\Models\Role;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Role>
+ * @extends Factory<Role>
  */
 class RoleFactory extends Factory
 {
@@ -21,6 +22,7 @@ class RoleFactory extends Factory
             'name' => fake()->unique()->jobTitle(),
             'order' => (string) fake()->unique()->numberBetween(1, 100),
             'status' => fake()->randomElement([EntityStatus::DRAFT, EntityStatus::ACTIVE]),
+            'created_by' => 1,
         ];
     }
 }
