@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\User;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Http\Request;
 
 class UserService
 {
@@ -12,7 +13,7 @@ class UserService
      *
      * @param  array  $filters  Validated query parameters from GetUsersRequest
      */
-    public function getPaginatedUsers(array $filters): LengthAwarePaginator
+    public function getPaginated(array $filters): LengthAwarePaginator
     {
         // 1. Extract dynamic structural values with safe fallbacks
         $sortBy = $filters['sort_by'] ?? 'created_at';
@@ -43,5 +44,52 @@ class UserService
             // Apply sorting rules and fetch pagination chunk
             ->orderBy($sortBy, $direction)
             ->paginate($perPage);
+    }
+
+    public function findUserById(int $id): ?User
+    {
+        return User::with(['branch', 'designation', 'department'])->find($id);
+    }
+
+    public function createUser(array $request)
+    {
+        $data['name'] = $request['name'];
+        $data['username'] = $request['username'];
+        $data['email'] = $request['email'];
+        $data['phone'] = $request['phone'];
+        $data['gender'] = $request['gender'];
+        $data['password'] = $request['password'];
+        $data['branch_id'] = $request['branch_id'];
+        $data['designation_id'] = $request['designation_id'];
+        $data['department_id'] = $request['department_id'];
+
+        return User::create($data);
+    }
+
+    public function updateUser(User $user, array $data)
+    {
+        return $user->update($data);
+    }
+
+    public function deleteUser(User $model): bool
+    {
+        return $model->delete();
+    }
+
+    public function dropdown(Request $request)
+    {
+        $query = User::query();
+
+        if ($request->filled('search')) {
+            $query->where('name', 'LIKE', '%'.$request->query('search').'%');
+        }
+
+        return $query->select('id', 'name', 'status')
+            ->get()
+            ->map(fn ($user) => [
+                'value' => $user->id,
+                'label' => $user->name,
+                'status' => $user->status,
+            ]);
     }
 }
