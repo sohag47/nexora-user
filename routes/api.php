@@ -48,7 +48,3 @@ Route::middleware('jwt.verify')->group(function () {
 Route::apiResources([
     'users' => UserController::class,
 ]);
-
-Route::prefix('dropdown')->group(function () {
-    Route::get('users', [UserController::class, 'dropdown']);
-});
