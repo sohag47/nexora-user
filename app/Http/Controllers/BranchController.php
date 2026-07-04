@@ -4,32 +4,28 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\Branch\BranchQueyRequest;
 use App\Http\Requests\Branch\UpsertBranchRequest;
+use App\Http\Requests\DropdownRequest;
 use App\Http\Resources\BranchResource;
+use App\Models\Branch;
 use App\Services\BranchService;
 use App\Traits\ApiResponse;
-use Illuminate\Http\Request;
-use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Support\Facades\Validator;
+use Illuminate\Http\JsonResponse;
 
 class BranchController extends Controller
 {
     use ApiResponse;
 
-    private $service;
-
-    public function __construct(BranchService $service)
-    {
-        $this->service = $service;
-    }
+    public function __construct(
+        private readonly BranchService $service
+    ) {}
 
     /**
      * Display a listing of the resource.
      */
-    public function index(BranchQueyRequest $request)
+    public function index(BranchQueyRequest $request): JsonResponse
     {
         $collections = $this->service->getPaginated($request->validated());
 
-        /** @var LengthAwarePaginator $collections */
         $collections->setCollection(BranchResource::collection($collections->getCollection())->collection);
 
         return $this->success($collections);
@@ -38,24 +34,21 @@ class BranchController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(UpsertBranchRequest $request)
+    public function store(UpsertBranchRequest $request): JsonResponse
     {
-        $user = $this->service->createItem($request->validated());
+        $item = $this->service->create($request->validated());
 
-        return $this->created($user);
+        return $this->created(
+            new BranchResource($item)
+        );
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(Branch $branch): JsonResponse
     {
-        $user = $this->service->findById($id);
-        if (empty($user)) {
-            return $this->notFound();
-        }
-
-        $resource = new BranchResource($user);
+        $resource = new BranchResource($branch);
 
         return $this->success($resource);
     }
@@ -63,13 +56,9 @@ class BranchController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpsertBranchRequest $request, string $id)
+    public function update(UpsertBranchRequest $request, Branch $branch): JsonResponse
     {
-        $item = $this->service->findById($id);
-        if (empty($item)) {
-            return $this->notFound();
-        }
-        $this->service->updateItem($item, $request->validated());
+        $this->service->update($branch, $request->validated());
 
         return $this->updated();
     }
@@ -77,29 +66,17 @@ class BranchController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Branch $branch): JsonResponse
     {
-        $item = $this->service->findById($id);
-        if (empty($item)) {
-            return $this->notFound();
-        }
-        $this->service->deleteItem($item);
+        $this->service->delete($branch);
 
         return $this->deleted();
     }
 
-    public function dropdown(Request $request)
+    public function dropdown(DropdownRequest $request): JsonResponse
     {
-        $validator = Validator::make($request->all(), [
-            'search' => ['nullable', 'string', 'max:255'],
-        ]);
+        $response = $this->service->dropdown($request->validated());
 
-        if ($validator->fails()) {
-            return $this->validationError($validator->errors());
-        }
-
-        $resource = $this->service->dropdown($request);
-
-        return $this->success($resource);
+        return $this->success($response);
     }
 }

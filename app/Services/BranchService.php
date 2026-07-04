@@ -3,23 +3,21 @@
 namespace App\Services;
 
 use App\Models\Branch;
-use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
 
 class BranchService
 {
-    private $model;
-
-    public function __construct(Branch $model)
-    {
-        $this->model = $model;
-    }
+    public function __construct(
+        private readonly Branch $model
+    ) {}
 
     /**
      * Get a filtered, sorted, and paginated list of users.
      *
      * @param  array  $filters  Validated query parameters from GetUsersRequest
      */
-    public function getPaginated(array $filters)
+    public function getPaginated(array $filters): LengthAwarePaginator
     {
         $sortBy = $filters['sort_by'] ?? 'created_at';
         $direction = $filters['direction'] ?? 'desc';
@@ -41,45 +39,41 @@ class BranchService
             ->paginate($perPage);
     }
 
-    public function findById(int $id)
+    public function create(array $request): Branch
     {
-        return $this->model::find($id);
+        return $this->model::create($request);
     }
 
-    public function createItem(array $request)
-    {
-        $data['name'] = $request['name'];
-        $data['code'] = $request['code'];
-        $data['address'] = $request['address'];
-
-        return $this->model::create($data);
-    }
-
-    public function updateItem(Branch $model, array $data)
+    public function update(Branch $model, array $data): bool
     {
         return $model->update($data);
     }
 
-    public function deleteItem(Branch $model): bool
+    public function delete(Branch $model): ?bool
     {
         return $model->delete();
     }
 
-    public function dropdown(Request $request)
+    public function dropdown(array $filters): Collection
     {
-        $query = $this->model::query();
+        $search = trim($filters['search'] ?? '');
+        $status = $filters['status'] ?? null;
 
-        if ($request->filled('search')) {
-            $query->where('name', 'LIKE', '%'.$request->query('search').'%');
-        }
-
-        return $query->select('id', 'name', 'status')
+        return $this->model
+            ->newQuery()
+            ->when($search !== '', function ($query) use ($search) {
+                $query->where('name', 'like', "%{$search}%");
+            })
+            ->when(! empty($status), function ($query) use ($status) {
+                $query->where('status', $status);
+            })
+            ->select('id', 'name', 'status')
             ->limit(20)
             ->get()
-            ->map(fn ($user) => [
-                'value' => $user->id,
-                'label' => $user->name,
-                'status' => $user->status,
+            ->map(fn (Branch $branch) => [
+                'value' => $branch->id,
+                'label' => $branch->name,
+                'status' => $branch->status,
             ]);
     }
 }
