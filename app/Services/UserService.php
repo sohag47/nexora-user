@@ -78,18 +78,32 @@ class UserService
 
     public function dropdown(Request $request)
     {
-        $query = User::query();
 
-        if ($request->filled('search')) {
-            $query->where('name', 'LIKE', '%'.$request->query('search').'%');
-        }
+        $search = trim($filters['search'] ?? '');
+        $status = $filters['status'] ?? null;
 
-        return $query->select('id', 'name', 'status')
-            ->get()
-            ->map(fn ($user) => [
-                'value' => $user->id,
-                'label' => $user->name,
-                'status' => $user->status,
-            ]);
+        return User::newQuery()
+            ->when($search !== '', function ($query) use ($search) {
+                $query->where('name', 'like', "%{$search}%");
+            })
+            ->when(! empty($status), function ($query) use ($status) {
+                $query->where('status', $status);
+            })
+            ->orderBy('name')
+            ->limit(20)
+            ->get(['id as value', 'name as label', 'status']);
+        // $query = User::query();
+
+        // if ($request->filled('search')) {
+        //     $query->where('name', 'LIKE', '%'.$request->query('search').'%');
+        // }
+
+        // return $query->select('id', 'name', 'status')
+        //     ->get()
+        //     ->map(fn ($user) => [
+        //         'value' => $user->id,
+        //         'label' => $user->name,
+        //         'status' => $user->status,
+        //     ]);
     }
 }

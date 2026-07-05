@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\BranchController;
+use App\Http\Controllers\DesignationsController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 use Symfony\Component\HttpFoundation\Response;
@@ -28,3 +29,4 @@ Route::get('/', function () {
 
 Route::get('users', [UserController::class, 'dropdown']);
 Route::get('branches', [BranchController::class, 'dropdown']);
+Route::get('designations', [DesignationsController::class, 'dropdown']);

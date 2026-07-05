@@ -136,6 +136,24 @@ API Collection for Fetching Custom Collection-Level and Multiple items
 php artisan make:resource UserCollection
 ```
 
+# Create Service Class
+
+```bash
+php artisan make:class Services/DesignationService
+```
+
+# Create Request file
+
+```bash
+php artisan make:request StoreBranchRequest
+```
+
+# Create Resource
+
+```bash
+php artisan make:resource BranchResource
+```
+
 # 🧠 Artisan Cache Command
 
 ## 🧹 Clear Cache

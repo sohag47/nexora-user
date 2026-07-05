@@ -2,14 +2,17 @@
 
 namespace App\Services;
 
-use App\Models\Branch;
+use App\Models\Designation;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 
-class BranchService
+class DesignationService
 {
+    /**
+     * Create a new class instance.
+     */
     public function __construct(
-        private readonly Branch $model
+        private readonly Designation $model
     ) {}
 
     /**
@@ -39,17 +42,17 @@ class BranchService
             ->paginate($perPage);
     }
 
-    public function create(array $request): Branch
+    public function create(array $request): Designation
     {
         return $this->model::create($request);
     }
 
-    public function update(Branch $model, array $data): bool
+    public function update(Designation $model, array $data): bool
     {
         return $model->update($data);
     }
 
-    public function delete(Branch $model): ?bool
+    public function delete(Designation $model): ?bool
     {
         return $model->delete();
     }

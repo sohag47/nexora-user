@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BranchController;
+use App\Http\Controllers\DesignationsController;
 use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -49,4 +50,5 @@ Route::middleware('jwt.verify')->group(function () {
 Route::apiResources([
     'users' => UserController::class,
     'branches' => BranchController::class,
+    'designations' => DesignationsController::class,
 ]);

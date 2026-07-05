@@ -9,5 +9,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Designation extends Model
 {
-    use HasAuditFields, HasFactory,SoftDeletes;
+    use HasAuditFields, HasFactory, SoftDeletes;
+
+    protected $guarded = [];
 }
