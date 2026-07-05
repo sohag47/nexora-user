@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BranchController;
+use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\DesignationsController;
 use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
@@ -51,4 +52,5 @@ Route::apiResources([
     'users' => UserController::class,
     'branches' => BranchController::class,
     'designations' => DesignationsController::class,
+    'departments' => DepartmentController::class,
 ]);
