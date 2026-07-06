@@ -23,18 +23,14 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
 
-
-
-
         // all seed
         Role::factory(5)->create();
         Client::factory(5)->create();
 
         // 1. Create the pools of data first
         $branches = Branch::factory(10)->create();
-        $designations =  Designation::factory(10)->create();
+        $designations = Designation::factory(10)->create();
         $departments = Department::factory(10)->recycle($branches)->create();
-
 
         // 2. Create your specific Test User using the recycle pools
         User::factory()
@@ -45,7 +41,7 @@ class DatabaseSeeder extends Seeder
             ->create([
                 'name' => 'Test User',
                 'email' => 'test@example.com',
-                'password' => 123456
+                'password' => 123456,
             ]);
 
         // 3. Create the 50 random dummy users using the same recycle pools
@@ -56,8 +52,8 @@ class DatabaseSeeder extends Seeder
             ->has(UserAdditionalInfo::factory(), 'additionalInfo')
             ->create();
 
-        $this->call([
-            UniversitySeeder::class, // Must run before UserSeeder
-        ]);
+        // $this->call([
+        //     UniversitySeeder::class, // Must run before UserSeeder
+        // ]);
     }
 }
