@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\BranchController;
+use App\Http\Controllers\ClientController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\DesignationsController;
 use App\Http\Controllers\UserController;
@@ -32,3 +33,4 @@ Route::get('users', [UserController::class, 'dropdown']);
 Route::get('branches', [BranchController::class, 'dropdown']);
 Route::get('designations', [DesignationsController::class, 'dropdown']);
 Route::get('departments', [DepartmentController::class, 'dropdown']);
+Route::get('clients', [ClientController::class, 'dropdown']);

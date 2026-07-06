@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BranchController;
+use App\Http\Controllers\ClientController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\DesignationsController;
 use App\Http\Controllers\UserController;
@@ -53,4 +54,5 @@ Route::apiResources([
     'branches' => BranchController::class,
     'designations' => DesignationsController::class,
     'departments' => DepartmentController::class,
+    'clients' => ClientController::class,
 ]);

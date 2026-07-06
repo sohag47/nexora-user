@@ -10,4 +10,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class UserAdditionalInfo extends Model
 {
     use HasAuditFields, HasFactory, SoftDeletes;
+
+    protected $guarded = [];
 }
