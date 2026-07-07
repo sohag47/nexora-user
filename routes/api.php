@@ -5,6 +5,7 @@ use App\Http\Controllers\BranchController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\DesignationsController;
+use App\Http\Controllers\UploadFilesController;
 use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -56,3 +57,6 @@ Route::apiResources([
     'departments' => DepartmentController::class,
     'clients' => ClientController::class,
 ]);
+
+Route::post('/upload-files', [UploadFilesController::class, 'store']);
+Route::delete('/delete-files', [UploadFilesController::class, 'destroy']);

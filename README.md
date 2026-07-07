@@ -154,6 +154,12 @@ php artisan make:request StoreBranchRequest
 php artisan make:resource BranchResource
 ```
 
+# Storage Link
+
+```bash
+php artisan storage:link
+```
+
 # 🧠 Artisan Cache Command
 
 ## 🧹 Clear Cache
