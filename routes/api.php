@@ -58,5 +58,19 @@ Route::apiResources([
     'clients' => ClientController::class,
 ]);
 
-Route::post('/upload-files', [UploadFilesController::class, 'store']);
-Route::delete('/delete-files', [UploadFilesController::class, 'destroy']);
+Route::prefix('files')->group(function () {
+    // 1. Upload a new file
+    Route::post('/upload', [UploadFilesController::class, 'store']);
+
+    // 2. Update an existing file (POST is required here for multipart/form-data)
+    Route::post('/update', [UploadFilesController::class, 'update']);
+
+    // 3. Download a file
+    Route::get('/download', [UploadFilesController::class, 'download']);
+
+    // 4. Delete a file
+    Route::delete('/delete', [UploadFilesController::class, 'destroy']);
+});
+
+// Route::post('/upload-files', [UploadFilesController::class, 'store']);
+// Route::delete('/delete-files', [UploadFilesController::class, 'destroy']);

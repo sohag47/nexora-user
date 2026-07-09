@@ -2,56 +2,74 @@
 
 namespace App\Traits;
 
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 trait DocumentTraits
 {
-    public function uploadFile($request)
+    public function uploadFile(array $payload): ?string
     {
-        // upload new file
         $outputFileName = null;
-        if ($request->hasFile('files')) {
+        if (isset($payload['files']) && $payload['files']) {
 
-            // ready or file
-            $file = $request->file('files');
-            $original_name = $file->getClientOriginalName();
+            $original_name = mb_convert_encoding($payload['files']->getClientOriginalName(), 'UTF-8', 'UTF-8');
 
-            // create directory path
-            $directory = trim($request->path_prefix.'/'.$request->field_name, '/');
-            $filename = $directory.'/'.uniqid().'_'.preg_replace('/\s+/', '_', $original_name);
+            // Create directory path based on the passed strings
+            $directory = trim($payload['directory'].'/'.$payload['fieldName'], '/');
+            $filename = uniqid().'_'.preg_replace('/\s+/', '_', $original_name);
 
-            // store file
-            $path = $file->storeAs($directory, $filename, 'public');
+            $path = $payload['files']->storeAs($directory, $filename, 'public');
 
-            // get public path
             $publicPath = Storage::url($path);
+
             $outputFileName = parse_url($publicPath, PHP_URL_PATH) ?: $publicPath;
         }
 
         return $outputFileName;
     }
 
-    public function deleteFile($file_path)
+    public function updateFile(array $payload, ?string $old_file_path = null): ?string
     {
-        $file_path_format = explode('/', $file_path);
-
-        if (count($file_path_format) > 0 && ($file_path_format[0] === '' && $file_path_format[1] === 'storage')) {
-            $original_file_path = '';
-            foreach ($file_path_format as $index => $directory) {
-                if ($index != 0 && $index != 1) {
-                    $original_file_path = $original_file_path.'/'.$directory;
-                }
+        if ($old_file_path) {
+            try {
+                $this->deleteFile($old_file_path);
+            } catch (\Exception $e) {
+                Log::warning('Could not delete old file: '.$e->getMessage());
             }
-            if (! empty($original_file_path)) {
-                if (Storage::disk('public')->exists($original_file_path)) {
-                    Storage::disk('public')->delete($original_file_path);
+        }
 
-                    return 'File Deleted Successfully';
-                }
-                throw new \Exception('Incorrect File Path!');
-            }
-        } else {
+        return $this->uploadFile($payload);
+    }
+
+    public function downloadFile(string $file_path, ?string $custom_file_name = null)
+    {
+        if (! str_contains($file_path, '/storage/')) {
             throw new \Exception('Incorrect File Path!');
         }
+
+        $relative_path = Str::after($file_path, '/storage/');
+
+        if (! Storage::disk('public')->exists($relative_path)) {
+            throw new \Exception('File does not exist on the server!');
+        }
+
+        $absolute_path = Storage::disk('public')->path($relative_path);
+
+        return response()->download($absolute_path, $custom_file_name);
+    }
+
+    public function deleteFile(string $file_path): string
+    {
+        if (! str_contains($file_path, '/storage/')) {
+            throw new \Exception('Incorrect File Path!');
+        }
+        $relative_path = Str::after($file_path, '/storage/');
+        if (! Storage::disk('public')->exists($relative_path)) {
+            throw new \Exception('Incorrect File Path!');
+        }
+        Storage::disk('public')->delete($relative_path);
+
+        return 'File Deleted Successfully';
     }
 }
