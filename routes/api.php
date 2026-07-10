@@ -22,6 +22,10 @@ Route::get('/', function () {
     ], Response::HTTP_OK);
 });
 
+Route::match(['HEAD'], '/ping', function () {
+    return response('', 200)->header('X-Server-Status', 'Alive');
+});
+
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/register', [AuthController::class, 'register']);
 
