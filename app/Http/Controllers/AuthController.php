@@ -10,6 +10,9 @@ use App\Models\User;
 use App\Traits\ApiResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Tymon\JWTAuth\Facades\JWTAuth;
+use Tymon\JWTAuth\Exceptions\JWTException;
+use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Str;
 
 class AuthController extends Controller
 {
@@ -19,7 +22,7 @@ class AuthController extends Controller
         $validator = Validator::make($request->all(), [
             'name'     => 'required|string|max:255',
             'email'    => 'required|email|unique:users',
-            'password' => 'required|min:6|confirmed',
+            'password' => 'required|min:8|confirmed',
         ]);
 
         if ($validator->fails()) {
@@ -32,13 +35,17 @@ class AuthController extends Controller
             'password' => Hash::make($request->password),
         ]);
 
-        $token = $user->createToken('auth_token')->plainTextToken;
+        // Use JWTAuth here too, to stay consistent with login/me/refresh/logout
+        $token = JWTAuth::fromUser($user);
+
         $response = [
-            'user' => $user,
+            'user'       => $user,
             'token'      => $token,
             'token_type' => 'bearer',
+            'expires_in' => config('jwt.ttl') * 60,
         ];
-        return $this->created($response,  'Registration was successful');
+
+        return $this->created($response, 'Registration was successful');
     }
 
     public function login(Request $request)
@@ -52,50 +59,62 @@ class AuthController extends Controller
             return $this->validationError($validator->errors());
         }
 
-        // $user = User::query()->where('email', $request->email)->first();
-        // if (!$user || !Hash::check($request->password, $user->password)) {
-        //     return $this->unauthorized('Invalid credentials');
-        // }
-        // // $token = $user->createToken('auth_token')->plainTextToken;
-        // $response = [
-        //     'user' => $user,
-        //     'token'      => $token,
-        //     'token_type' => 'bearer',
-        // ];
+        $key = Str::lower($request->email) . '|' . $request->ip();
 
-        $credentials = $request->only('email', 'password');
-        if (!$token = JWTAuth::attempt($credentials)) {
-            return response()->json(['error' => 'Invalid email or password'], 401);
+        if (RateLimiter::tooManyAttempts($key, 5)) {
+            $seconds = RateLimiter::availableIn($key);
+            return $this->unauthorized("Too many attempts. Try again in {$seconds} seconds.");
         }
 
-        return $this->respondWithToken($token)
+        $credentials = $request->only('email', 'password');
 
-            // $response = [
-            //     'access_token' => $token,
-            //     'token_type' => 'bearer',
-            //     'expires_in' => config('jwt.ttl') * 60
-            // ];
-        ;
+        if (!$token = JWTAuth::attempt($credentials)) {
+            RateLimiter::hit($key, 60);
+            return $this->unauthorized('Invalid credentials');
+        }
 
-        // return $this->success($response,  'Login successfully');
+        RateLimiter::clear($key);
+
+        $response = [
+            'token'      => $token,
+            'token_type' => 'bearer',
+            'expires_in' => config('jwt.ttl') * 60,
+        ];
+
+        return $this->success($response, 'Login successfully');
     }
 
     public function me()
     {
-        return $this->success(JWTAuth::user(),  'User profile retrieved successfully');
+        return $this->success(auth('api')->user(), 'User profile retrieved successfully');
     }
 
     public function refresh()
     {
-        return $this->respondWithToken(JWTAuth::refresh());
+        try {
+            $token = JWTAuth::refresh(JWTAuth::getToken());
+        } catch (JWTException $e) {
+            return $this->unauthorized('Token could not be refreshed');
+        }
+
+        return $this->success([
+            'token'      => $token,
+            'token_type' => 'bearer',
+            'expires_in' => config('jwt.ttl') * 60,
+        ], 'Token refreshed successfully');
     }
 
     public function logout()
     {
-        JWTAuth::invalidate(JWTAuth::getToken());
-        $cookie = cookie()->forget('token');
-        return $this->success(message: 'Logged out successfully')->withCookie($cookie);
+        try {
+            JWTAuth::invalidate(JWTAuth::getToken());
+        } catch (JWTException $e) {
+            return $this->unauthorized('Token not provided or already invalid');
+        }
+
+        return $this->success(message: 'Logged out successfully');
     }
+
 
     protected function respondWithToken($token)
     {
