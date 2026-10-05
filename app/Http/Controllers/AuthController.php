@@ -2,26 +2,26 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Validator;
 use App\Models\User;
 use App\Traits\ApiResponse;
-use Symfony\Component\HttpFoundation\Response;
-use Tymon\JWTAuth\Facades\JWTAuth;
-use Tymon\JWTAuth\Exceptions\JWTException;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
+use Symfony\Component\HttpFoundation\Response;
+use Tymon\JWTAuth\Exceptions\JWTException;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class AuthController extends Controller
 {
     use ApiResponse;
+
     public function register(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'name'     => 'required|string|max:255',
-            'email'    => 'required|email|unique:users',
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users',
             'password' => 'required|min:8|confirmed',
         ]);
 
@@ -30,8 +30,8 @@ class AuthController extends Controller
         }
 
         $user = User::create([
-            'name'     => $request->name,
-            'email'    => $request->email,
+            'name' => $request->name,
+            'email' => $request->email,
             'password' => Hash::make($request->password),
         ]);
 
@@ -39,8 +39,8 @@ class AuthController extends Controller
         $token = JWTAuth::fromUser($user);
 
         $response = [
-            'user'       => $user,
-            'token'      => $token,
+            'user' => $user,
+            'token' => $token,
             'token_type' => 'bearer',
             'expires_in' => config('jwt.ttl') * 60,
         ];
@@ -51,7 +51,7 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'email'    => 'required|email',
+            'email' => 'required|email',
             'password' => 'required',
         ]);
 
@@ -59,29 +59,31 @@ class AuthController extends Controller
             return $this->validationError($validator->errors());
         }
 
-        $key = Str::lower($request->email) . '|' . $request->ip();
+        $key = Str::lower($request->email).'|'.$request->ip;
 
         if (RateLimiter::tooManyAttempts($key, 5)) {
             $seconds = RateLimiter::availableIn($key);
-            return $this->unauthorized("Too many attempts. Try again in {$seconds} seconds.");
+
+            return $this->unauthorized(
+                "Too many attempts. Try again in {$seconds} seconds."
+            );
         }
 
         $credentials = $request->only('email', 'password');
 
-        if (!$token = JWTAuth::attempt($credentials)) {
+        if (! $token = JWTAuth::attempt($credentials)) {
             RateLimiter::hit($key, 60);
+
             return $this->unauthorized('Invalid credentials');
         }
 
         RateLimiter::clear($key);
 
-        $response = [
-            'token'      => $token,
+        return $this->success([
+            'token' => $token,
             'token_type' => 'bearer',
             'expires_in' => config('jwt.ttl') * 60,
-        ];
-
-        return $this->success($response, 'Login successfully');
+        ], 'Login successfully');
     }
 
     public function me()
@@ -98,7 +100,7 @@ class AuthController extends Controller
         }
 
         return $this->success([
-            'token'      => $token,
+            'token' => $token,
             'token_type' => 'bearer',
             'expires_in' => config('jwt.ttl') * 60,
         ], 'Token refreshed successfully');
@@ -114,7 +116,6 @@ class AuthController extends Controller
 
         return $this->success(message: 'Logged out successfully');
     }
-
 
     protected function respondWithToken($token)
     {

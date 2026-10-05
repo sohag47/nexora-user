@@ -28,10 +28,11 @@ Route::match(['HEAD'], '/ping', function () {
 
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/register', [AuthController::class, 'register']);
+Route::post('/refresh', [AuthController::class, 'refresh']);
 
 Route::middleware('jwt.verify')->group(function () {
     Route::get('/me', [AuthController::class, 'me']);
-    Route::post('/logout', [AuthController::class, 'logout']);
+    Route::delete('/logout', [AuthController::class, 'logout']);
 });
 
 // Route::middleware('jwt.verify')->get('/validate-token', function () {
